@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <!--
+      <link rel='stylesheet' href='$app_path/resources/css/menu.css'>
+      <script src='$app_path/resources/js/hcont.js'></script>
+     -->
+
+    <style>
+        .nwrapper {
+            display: flex;
+            flex-flow: row wrap;
+        }
+
+        .nwrapper > * {
+            flex: 1 100%;
+        }
+
+        /* Средние экраны */
+        @media all and (min-width: 600px) {
+            /* Мы говорим обеим боковым панелям встать в одну строку */
+            .aside { flex: 1 auto; }
+        }
+
+        /* Большие экраны */
+        @media all and (min-width: 800px) {
+            /* инвертируем порядок первой боковой панели и основной и говорим главному элементу, чтобы он занимал вдвое большую ширину, чем две другие боковые панели
+             */
+            .main { flex: 8 0px; }
+            .aside-1 { order: 1; }
+            .main    { order: 2; }
+            .aside-2 { order: 3; }
+            .footer  { order: 4; }
+        }
+    </style>
+
+    <title>Тестовая страница</title>
+</head>
+
+<body>
+
+<div class="nwrapper">
+
+    <div class="aside-1">&nbsp;</div>
+    <div class="main">
+
+    </div><!-- main -->
+    <div class="aside-2">&nbsp;</div>
+    <div class="footer">&copy;Наше всё</div>
+
+</div>
+
+</body>
+</html>
