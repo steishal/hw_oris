@@ -19,7 +19,6 @@ class ClientHandler implements Runnable {
             while ((message = bufferedReader.readLine()) != null) {
                 System.out.println("From client " + clientSocket.getPort() + ":" + message);
 
-                // Ответ в зависимости от полученного сообщения
                 switch (message) {
                     case "Привет":
                         bufferedWriter.write("Привет\n");
