@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Server {
-    public static final int SERVER_PORT = 50000;
+    public static final int SERVER_PORT = 50005;
 
     public static void main(String[] args) {
         try (ServerSocket server = new ServerSocket(SERVER_PORT)) {

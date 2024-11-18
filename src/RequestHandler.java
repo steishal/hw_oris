@@ -4,7 +4,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class RequestHandler implements Runnable {
+
     private final Socket clientSocket;
+    private static final String DEFAULT_HTML = "<html><body><h1>Hello, World!</h1></body></html>";
+    public static final String ROOT_DIRECTORY = "/Users/anastasia/IdeaProjects/hw2";
 
     public RequestHandler(Socket socket) {
         this.clientSocket = socket;
@@ -15,25 +18,32 @@ public class RequestHandler implements Runnable {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
              OutputStream out = clientSocket.getOutputStream()) {
 
-            String requestLine = in.readLine();
-            if (requestLine == null) return;
+                String requestLine = in.readLine();
+                if (requestLine == null) return;
 
-            System.out.println("Request: " + requestLine);
-            String[] requestParts = requestLine.split(" ");
-            String method = requestParts[0];
-            String uri = requestParts[1];
+                System.out.println("Request: " + requestLine);
+                String[] requestParts = requestLine.split(" ");
 
-            if (method.equals("GET")) {
+                if (requestParts.length < 3) {sendResponse(out, "HTTP/1.1 400 Bad Request", "Bad Request");}
+
+                String method = requestParts[0];
+                String uri = requestParts[1];
+                String httpVersion = requestParts[2];
+
+                if(!httpVersion.equals("HTTP/1.1")) {sendResponse(out, "HTTP/1.1 505 HTTP Version Not Supported", "HTTP Version Not Supported");}
+
+                if (method.equals("GET")) {
                 handleGetRequest(out, uri);
-            } else if (method.equals("POST")) {
+                }
+                else if (method.equals("POST")) {
                 handlePostRequest(in, out);
-            } else {
+                }
+                else {
                 sendResponse(out, "HTTP/1.1 405 Method Not Allowed", "Method Not Allowed");
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
             try {
                 clientSocket.close();
             } catch (IOException e) {
@@ -43,23 +53,25 @@ public class RequestHandler implements Runnable {
     }
 
     private void handleGetRequest(OutputStream out, String uri) throws IOException {
-        // Путь к файлу index.html
-        Path filePath = Path.of("/Users/anastasia/IdeaProjects/hw2", uri.equals("/") ? "index.html" : uri.substring(1));
-
-        if (Files.exists(filePath)) {
-            byte[] fileContent = Files.readAllBytes(filePath);
-            String contentType = Files.probeContentType(filePath);
-            sendResponse(out, "HTTP/1.1 200 OK", fileContent, contentType);
-        } else {
-            sendResponse(out, "HTTP/1.1 404 Not Found", "File Not Found");
+        if (uri.equals("/")) {
+            byte[] defaultContent = DEFAULT_HTML.getBytes();
+            sendResponse(out, "HTTP/1.1 200 OK", defaultContent, "text/html; charset=utf-8");
+        }
+        else {
+            Path filePath = Path.of(ROOT_DIRECTORY, "index.html" );
+            if (Files.exists(filePath)) {
+                byte[] fileContent = Files.readAllBytes(filePath);
+                String contentType = Files.probeContentType(filePath);
+                sendResponse(out, "HTTP/1.1 200 OK", fileContent, contentType);
+            } else {
+                sendResponse(out, "HTTP/1.1 404 Not Found", "File Not Found");
+            }
         }
     }
 
     private void handlePostRequest(BufferedReader in, OutputStream out) throws IOException {
         String line;
         int contentLength = 0;
-
-        // Чтение заголовков
         while (!(line = in.readLine()).isEmpty()) {
             if (line.startsWith("Content-Length:")) {
                 contentLength = Integer.parseInt(line.split(":")[1].trim());
@@ -76,7 +88,7 @@ public class RequestHandler implements Runnable {
 
     private void sendResponse(OutputStream out, String statusLine, String body) throws IOException {
         byte[] bodyBytes = body.getBytes();
-        String headers = "Content-Type: text/htmlrn; charset=utf-8\r\n" +
+        String headers = "Content-Type: text/html\r\n; charset=utf-8\r\n" +
                 "Content-Length: " + bodyBytes.length + "\r\n\r\n";
 
         out.write((statusLine + "\r\n" + headers).getBytes());
